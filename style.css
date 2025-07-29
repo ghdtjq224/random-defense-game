@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    font-family: 'Noto Sans KR', sans-serif;
+    margin: 20px;
+}
+
+h1 {
+    border-bottom: 2px solid #e67e22;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap; /* 모바일 화면에서 줄바꿈을 위함 */
+    justify-content: center;
+    border: 2px solid #34495e;
+    border-radius: 10px;
+    padding: 15px;
+    background-color: #34495e;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+#game-canvas {
+    border: 2px solid #2c3e50;
+    background-color: #ecf0f1;
+    border-radius: 5px;
+    max-width: 100%; /* 화면 크기에 맞게 조절 */
+    height: auto; /* 비율 유지 */
+}
+
+#ui-container {
+    width: 200px;
+    padding: 0 20px;
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#controls {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+#controls button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+#buy-unit-btn {
+    background-color: #e67e22;
+}
+#buy-unit-btn:hover {
+    background-color: #d35400;
+}
+
+#pause-btn {
+    background-color: #3498db;
+}
+#pause-btn:hover {
+    background-color: #2980b9;
+}
+
+#controls button:active {
+    transform: translateY(2px);
+}
+
+#info, #evolution-info {
+    background-color: #2c3e50;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+#info p, #evolution-info p {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+#info span, #evolution-info span {
+    font-weight: bold;
+    color: #f1c40f;
+    float: right;
+}
+
+#evolution-info h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #34495e;
+    padding-bottom: 5px;
+    color: #e67e22;
+}
+
+.penalty {
+    font-size: 12px !important;
+    color: #e74c3c;
+    margin-top: -5px !important;
+    text-align: right;
+}
+
+/* 모바일 반응형 레이아웃 */
+@media (max-width: 1050px) {
+    #game-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    #ui-container {
+        width: 100%;
+        max-width: 800px; /* 캔버스 너비와 맞춤 */
+        margin-left: 0;
+        margin-top: 20px;
+        flex-direction: row;
+        justify-content: space-around;
+    }
+    #controls {
+        width: 45%;
+    }
+    #info, #evolution-info {
+        width: 45%;
+        margin-bottom: 0;
+    }
+}

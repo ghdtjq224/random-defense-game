@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>랜덤 디펜스</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Random Defense</h1>
+    <div id="game-container">
+        <canvas id="game-canvas" width="800" height="600"></canvas>
+        <div id="ui-container">
+            <div id="controls">
+                <button id="buy-unit-btn">유닛 구매 (10 Gold)</button>
+                <button id="pause-btn">일시정지</button>
+            </div>
+            <div id="info">
+                <p>골드: <span id="gold">100</span></p>
+                <p>생명력: <span id="life">20</span></p>
+                <p>스테이지: <span id="stage">1</span></p>
+                <p>다음 웨이브: <span id="wave-timer">30</span>초</p>
+            </div>
+            <div id="evolution-info">
+                <h4>특수 진화 확률</h4>
+                <p>신화 (3+3): <span id="mythic-chance">20</span>%</p>
+                <p class="penalty">(실패 시 2레벨로 하락)</p>
+                <p>태초 (신화+신화): <span id="primordial-chance">5</span>%</p>
+                <p class="penalty">(실패 시 1레벨로 하락)</p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
