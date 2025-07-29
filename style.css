@@ -35,6 +35,12 @@ h1 {
     border-radius: 5px;
     max-width: 100%; /* 화면 크기에 맞게 조절 */
     height: auto; /* 비율 유지 */
+
+    /* --- 모바일 터치 문제 해결을 위한 코드 --- */
+    touch-action: none; /* 터치 시 스크롤 등 브라우저 기본 동작 방지 */
+    user-select: none; /* 텍스트 선택 방지 */
+    -webkit-user-select: none; /* 구형 브라우저 호환성 */
+    -webkit-tap-highlight-color: transparent; /* 터치 시 하이라이트 제거 */
 }
 
 #ui-container {
