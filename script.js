@@ -33,13 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 requestAnimationFrame(gameLoop);
             }
         };
-        images[key].onerror = () => {
-            // Handle image loading errors, maybe show a placeholder
-            imagesLoaded++;
-            if (imagesLoaded === numImages) {
-                requestAnimationFrame(gameLoop);
-            }
-        };
     }
 
     // --- Game State ---
@@ -47,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let enemies = [], allies = [], projectiles = [];
     let waveTimer = 30, waveInProgress = false;
     let isPaused = false;
+    let lastTime = 0;
 
     // --- Game Constants ---
     const INNER_X_START = 100, INNER_Y_START = 100;
@@ -149,13 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         draw() {
-            let imgKey = `level_${this.level}`;
-            if (this.type === 'mythic') imgKey = 'mythic';
-            else if (this.type === 'primordial') imgKey = 'primordial';
+            let img;
+            if (this.type === 'mythic') img = images.mythic;
+            else if (this.type === 'primordial') img = images.primordial;
+            else img = images[`level_${this.level}`];
 
-            const img = images[imgKey];
-
-            if (img && img.complete && img.naturalHeight !== 0) {
+            if (img && img.complete) {
                 ctx.drawImage(img, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
             } else {
                 ctx.fillStyle = '#95a5a6';
@@ -163,8 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.fillStyle = 'white';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
                 ctx.fillText('?', this.x, this.y);
             }
         }
@@ -202,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isPaused = !isPaused;
         pauseBtn.textContent = isPaused ? "계속" : "일시정지";
         if (!isPaused) {
-            requestAnimationFrame(gameLoop);
+            requestAnimationFrame(gameLoop); // 정지 해제 시 루프 다시 시작
         }
     }
 
@@ -233,22 +224,24 @@ document.addEventListener('DOMContentLoaded', () => {
             let attempts = 0;
             const centerX = INNER_X_START + (INNER_X_END - INNER_X_START) / 2;
             const centerY = INNER_Y_START + (INNER_Y_END - INNER_Y_START) / 2;
-            const spawnRadius = 80;
+            const spawnRadius = 80; // 소환 반경을 넓혀서 겹칠 확률 감소
 
             do {
                 occupied = false;
+                // 중앙 영역 근처에 랜덤하게 위치 생성
                 x = centerX + (Math.random() - 0.5) * 2 * spawnRadius;
                 y = centerY + (Math.random() - 0.5) * 2 * spawnRadius;
 
+                // 다른 유닛과 겹치는지 확인
                 for (const ally of allies) {
                     const dist = Math.sqrt(Math.pow(ally.x - x, 2) + Math.pow(ally.y - y, 2));
-                    if (dist < 40) {
+                    if (dist < 40) { // 유닛 크기를 고려한 충돌 감지
                         occupied = true;
                         break;
                     }
                 }
                 attempts++;
-            } while (occupied && attempts < 50);
+            } while (occupied && attempts < 50); // 50번 시도해서 빈 공간을 못 찾으면 포기
 
             if (!occupied) {
                 allies.push(new Ally(x, y));
@@ -306,51 +299,46 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(gameLoop);
     }
 
-    // --- Input Handlers (Improved for Mobile) ---
-    function getEventCoords(e) {
-        const rect = canvas.getBoundingClientRect();
-        let touch = e.touches && e.touches[0] || e.changedTouches && e.changedTouches[0];
-        if (touch) {
-            return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
-        } 
-        return { x: e.clientX - rect.left, y: e.clientY - rect.top }; // Mouse
-    }
-
+    // --- Input Handlers ---
     function handleDragStart(e) {
         e.preventDefault();
-        const coords = getEventCoords(e);
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        const mouseY = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
 
         for (let i = allies.length - 1; i >= 0; i--) {
             const ally = allies[i];
-            const dist = Math.sqrt(Math.pow(ally.x - coords.x, 2) + Math.pow(ally.y - coords.y, 2));
+            const dist = Math.sqrt(Math.pow(ally.x - mouseX, 2) + Math.pow(ally.y - mouseY, 2));
             if (dist < ally.size / 2) {
                 draggingUnit = allies.splice(i, 1)[0];
                 originalX = draggingUnit.x; originalY = draggingUnit.y;
-                return;
+                break;
             }
         }
     }
 
     function handleDragMove(e) {
+        e.preventDefault();
         if (draggingUnit) {
-            e.preventDefault();
-            const coords = getEventCoords(e);
-            draggingUnit.x = coords.x;
-            draggingUnit.y = coords.y;
+            const rect = canvas.getBoundingClientRect();
+            draggingUnit.x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            draggingUnit.y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
         }
     }
 
     function handleDragEnd(e) {
+        e.preventDefault();
         if (draggingUnit) {
-            e.preventDefault();
-            const coords = getEventCoords(e);
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = (e.changedTouches ? e.changedTouches[0].clientX : e.clientX) - rect.left;
+            const mouseY = (e.changedTouches ? e.changedTouches[0].clientY : e.clientY) - rect.top;
             let combined = false;
 
             for (let i = 0; i < allies.length; i++) {
                 const targetAlly = allies[i];
-                const dist = Math.sqrt(Math.pow(targetAlly.x - coords.x, 2) + Math.pow(targetAlly.y - coords.y, 2));
+                const dist = Math.sqrt(Math.pow(targetAlly.x - mouseX, 2) + Math.pow(targetAlly.y - mouseY, 2));
                 
-                if (targetAlly !== draggingUnit && dist < targetAlly.size / 2) {
+                if (dist < targetAlly.size / 2) {
                     const newX = targetAlly.x, newY = targetAlly.y;
                     if (draggingUnit.level === 3 && targetAlly.level === 3 && draggingUnit.type === 'normal' && targetAlly.type === 'normal') {
                         if (Math.random() < MYTHIC_CHANCE) allies.push(new Ally(newX, newY, 1, 'mythic'));
@@ -368,8 +356,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!combined) {
-                if (coords.x > INNER_X_START && coords.x < INNER_X_END && coords.y > INNER_Y_START && coords.y < INNER_Y_END) {
-                    draggingUnit.x = coords.x; draggingUnit.y = coords.y;
+                if (mouseX > INNER_X_START && mouseX < INNER_X_END && mouseY > INNER_Y_START && mouseY < INNER_Y_END) {
+                    draggingUnit.x = mouseX; draggingUnit.y = mouseY;
                 } else {
                     draggingUnit.x = originalX; draggingUnit.y = originalY;
                 }
@@ -383,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         if (imagesLoaded === numImages && !waveInProgress && !isPaused) {
             waveTimer--;
-            waveTimerEl.textContent = waveTimer > 0 ? waveTimer : 0;
+            waveTimerEl.textContent = waveTimer;
             if (waveTimer <= 0) {
                 startWave();
                 waveTimerEl.textContent = "진행중";
@@ -399,11 +387,6 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.addEventListener('mousemove', handleDragMove);
     canvas.addEventListener('mouseup', handleDragEnd);
 
-    // Touch Events (with passive: false to allow preventDefault)
-    canvas.addEventListener('touchstart', handleDragStart, { passive: false });
-    canvas.addEventListener('touchmove', handleDragMove, { passive: false });
-    canvas.addEventListener('touchend', handleDragEnd, { passive: false });
-});
     // Touch Events
     canvas.addEventListener('touchstart', handleDragStart);
     canvas.addEventListener('touchmove', handleDragMove);
