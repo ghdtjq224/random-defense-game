@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>랜덤 디펜스</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Random Defense</h1>
+    <div id="game-container">
+      <canvas id="game-canvas" width="800" height="600"></canvas>
+      <div id="unit-details" class="hidden">
+        <div id="unit-info-left">
+          <img id="unit-detail-img" src="" alt="Unit Image" />
+          <p id="unit-detail-name"></p>
+        </div>
+        <div id="unit-info-right">
+          <div id="unit-evolution-info">
+            <p>
+              진화 데이터: <span id="unit-detail-kills">0</span> /
+              <span id="unit-detail-req">10</span>
+            </p>
+            <button id="evolve-btn" disabled>진화</button>
+            <button id="dismiss-btn">이별</button>
+          </div>
+        </div>
+      </div>
+      <div id="ui-container">
+        <div id="controls">
+          <button id="buy-unit-btn">유닛 구매 (10 Gold)</button>
+          <button id="shop-btn">상점</button>
+          <button id="start-wave-btn">웨이브 시작</button>
+          <button id="pause-btn">일시정지</button>
+          <div id="skip-evolution-container">
+            <input type="checkbox" id="skip-evolution-checkbox" />
+            <label for="skip-evolution-checkbox">진화 장면 스킵</label>
+          </div>
+        </div>
+        <div id="info">
+          <p>골드: <span id="gold">40</span></p>
+          <p>생명력: <span id="life">20</span></p>
+          <p>스테이지: <span id="stage">1</span></p>
+          <p>다음 웨이브: <span id="wave-timer">30</span>초</p>
+          <p>웨이브 시간: <span id="wave-time-limit">-</span></p>
+        </div>
+      </div>
+    </div>
+    <div id="evolution-animation" class="hidden">
+      <video
+        id="evolution-video"
+        src="img/Jogress Evolution/File_Dramon.mp4"
+        
+        playsinline
+      ></video>
+      <div class="flash-effect"></div>
+    </div>
+    <button id="restart-btn" class="hidden">다시하기</button>
+
+    <div id="player-inventory">
+      <h2>보유 아이템</h2>
+      <div id="inventory-crests">
+        <div class="inventory-item" data-crest-type="courage" draggable="true">
+          <img src="img/Item/crest_courage.png" alt="용기" />
+          <span class="inventory-count">0</span>
+        </div>
+        <div
+          class="inventory-item"
+          data-crest-type="friendship"
+          draggable="true"
+        >
+          <img src="img/Item/crest_friendship.png" alt="우정" />
+          <span class="inventory-count">0</span>
+        </div>
+        <div class="inventory-item" data-crest-type="love" draggable="true">
+          <img src="img/Item/crest_love.png" alt="사랑" />
+          <span class="inventory-count">0</span>
+        </div>
+        <div
+          class="inventory-item"
+          data-crest-type="sincerity"
+          draggable="true"
+        >
+          <img src="img/Item/crest_sincerity.png" alt="순수" />
+          <span class="inventory-count">0</span>
+        </div>
+        <div
+          class="inventory-item"
+          data-crest-type="knowledge"
+          draggable="true"
+        >
+          <img src="img/Item/crest_knowledge.png" alt="지식" />
+          <span class="inventory-count">0</span>
+        </div>
+        <div
+          class="inventory-item"
+          data-crest-type="reliability"
+          draggable="true"
+        >
+          <img src="img/Item/crest_reliability.png" alt="성실" />
+          <span class="inventory-count">0</span>
+        </div>
+        <div class="inventory-item" data-crest-type="hope" draggable="true">
+          <img src="img/Item/crest_hope.png" alt="희망" />
+          <span class="inventory-count">0</span>
+        </div>
+        <div class="inventory-item" data-crest-type="light" draggable="true">
+          <img src="img/Item/crest_light.png" alt="빛" />
+          <span class="inventory-count">0</span>
+        </div>
+        <div
+          class="inventory-item"
+          data-crest-type="chromidizoid_gold"
+          draggable="true"
+        >
+          <img
+            src="img/Item/Chromidizoid_ Gold.webp"
+            alt="크로미디조이드 골드"
+          />
+          <span class="inventory-count">0</span>
+        </div>
+        <div
+          class="inventory-item"
+          data-crest-type="chromidizoid_black"
+          draggable="true"
+        >
+          <img
+            src="img/Item/Chromidizoid_ Black.webp"
+            alt="크로미디조이드 블랙"
+          />
+          <span class="inventory-count">0</span>
+        </div>
+        <div
+          class="inventory-item"
+          data-crest-type="evolutionary_data"
+          draggable="true"
+        >
+          <img src="img/Item/evolutionarydata.webp" alt="진화 데이터" />
+          <span class="inventory-count">0</span>
+        </div>
+      </div>
+      <p id="selected-crest-info">선택된 아이템: 없음</p>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="shop-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>상점</h2>
+        <div id="shop-items">
+          <div class="shop-item">
+            <h3>용기의 문장</h3>
+            <p>가격: 50 Gold</p>
+            <button class="buy-crest-btn" data-crest="courage">구매</button>
+          </div>
+          <div class="shop-item">
+            <h3>우정의 문장</h3>
+            <p>가격: 50 Gold</p>
+            <button class="buy-crest-btn" data-crest="friendship">구매</button>
+          </div>
+          <div class="shop-item">
+            <h3>사랑의 문장</h3>
+            <p>가격: 50 Gold</p>
+            <button class="buy-crest-btn" data-crest="love">구매</button>
+          </div>
+          <div class="shop-item">
+            <h3>순수의 문장</h3>
+            <p>가격: 50 Gold</p>
+            <button class="buy-crest-btn" data-crest="sincerity">구매</button>
+          </div>
+          <div class="shop-item">
+            <h3>지식의 문장</h3>
+            <p>가격: 50 Gold</p>
+            <button class="buy-crest-btn" data-crest="knowledge">구매</button>
+          </div>
+          <div class="shop-item">
+            <h3>성실의 문장</h3>
+            <p>가격: 50 Gold</p>
+            <button class="buy-crest-btn" data-crest="reliability">구매</button>
+          </div>
+          <div class="shop-item">
+            <h3>희망의 문장</h3>
+            <p>가격: 50 Gold</p>
+            <button class="buy-crest-btn" data-crest="hope">구매</button>
+          </div>
+          <div class="shop-item">
+            <h3>빛의 문장</h3>
+            <p>가격: 50 Gold</p>
+            <button class="buy-crest-btn" data-crest="light">구매</button>
+          </div>
+          <div class="shop-item">
+            <h3>Chromidizoid Gold</h3>
+            <p>가격: 100 Gold</p>
+            <button class="buy-crest-btn" data-crest="chromidizoid_gold">
+              구매
+            </button>
+          </div>
+          <div class="shop-item">
+            <h3>Chromidizoid Black</h3>
+            <p>가격: 100 Gold</p>
+            <button class="buy-crest-btn" data-crest="chromidizoid_black">
+              구매
+            </button>
+          </div>
+          <div class="shop-item">
+            <h3>Evolutionary Data (5개)</h3>
+            <p>가격: 30 Gold</p>
+            <button class="buy-crest-btn" data-crest="evolutionary_data">
+              구매
+            </button>
+          </div>
+          <div class="shop-item">
+            <h3>전설의 디지몬 알</h3>
+            <p>가격: 200 Gold</p>
+            <button id="buy-legendary-egg-btn">구매</button>
+          </div>
+        </div>
+        <p>보유 골드: <span id="shop-gold">40</span></p>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
